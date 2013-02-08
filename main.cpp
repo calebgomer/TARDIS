@@ -6,6 +6,11 @@
 #else
 #include <GL/glut.h>
 #endif
+#include <iostream>
+#include <sstream>
+#include <vector>
+#include <map>
+#include <utility>
 
 // angle of rotation for the camera direction
 float angle = 0.0f;
@@ -157,7 +162,7 @@ void renderScene(void) {
   glBegin(GL_QUADS);
   
   //top of this box
-  glColor3ub(24, 47, 89);
+  glColor3ub(33, 71, 120);
   
   glVertex3f(240, 40, 0);
   glVertex3f(240, 40, -240);
@@ -165,7 +170,7 @@ void renderScene(void) {
   glVertex3f(0, 40, 0);
   
   //bottom of this box
-  glColor3ub(22, 45, 87);
+  glColor3ub(33, 71, 120);
   
   glVertex3f(240, 0, 0);
   glVertex3f(0, 0, 0);
@@ -181,6 +186,71 @@ void renderScene(void) {
   
   glEnd();
   
+  //very top boxes
+  glTranslatef(15,40,-15);
+  glColor3ub(22, 45, 87);
+
+
+  glBegin(GL_QUAD_STRIP);
+
+  glVertex3f(210, 0, 0);
+  glVertex3f(210, 15, 0);
+  glVertex3f(0, 0, 0);
+  glVertex3f(0, 15, 0);
+
+  glVertex3f(0, 0, -210);
+  glVertex3f(0, 15, -210);
+
+  glVertex3f(210, 0, -210);
+  glVertex3f(210, 15, -210);
+
+  glVertex3f(210, 0, 0);
+  glVertex3f(210, 15, 0);
+  glEnd();
+
+  glBegin(GL_QUADS);
+  
+  //top of this box
+  glColor3ub(33, 71, 120);
+  
+  glVertex3f(210, 15, 0);
+  glVertex3f(210, 15, -210);
+  glVertex3f(0, 15, -210);
+  glVertex3f(0, 15, 0);
+  glEnd();
+
+
+  glTranslatef(10,15,-10);
+  glBegin(GL_QUAD_STRIP);
+  glColor3ub(22, 45, 87);
+
+  glVertex3f(190, 0, 0);
+  glVertex3f(190, 5, 0);
+  glVertex3f(0, 0, 0);
+  glVertex3f(0, 5, 0);
+
+  glVertex3f(0, 0, -190);
+  glVertex3f(0, 5, -190);
+
+  glVertex3f(190, 0, -190);
+  glVertex3f(190, 5, -190);
+
+  glVertex3f(190, 0, 0);
+  glVertex3f(190, 5, 0);
+  glEnd();
+
+  glBegin(GL_QUADS);
+  
+  //top of this box
+  glColor3ub(33, 71, 120);
+  
+  glVertex3f(190, 5, 0);
+  glVertex3f(190, 5, -190);
+  glVertex3f(0, 5, -190);
+  glVertex3f(0, 5, 0);
+  glEnd();
+
+
   glPopMatrix();
   
   
@@ -261,8 +331,8 @@ void renderScene(void) {
   
   //left face
   glPushMatrix();
-  glRotatef(90.0f,0.0f, 1.0f, 0.0f);
-  glTranslatef(-10, 0, 8);
+  glRotatef(-90.0f,0.0f, 1.0f, 0.0f);
+  glTranslatef(-240, 0, -10);
   glCallList(tardis_face_list);
   glPopMatrix();
 
@@ -276,7 +346,8 @@ void renderScene(void) {
 
   //back face
   glPushMatrix();
-  glTranslatef(0, 0, -232);
+  glRotatef(180.0f,0.0f, 1.0f, 0.0f);
+  glTranslatef(-250, 0, 240);
   glCallList(tardis_face_list);
   glPopMatrix();
   
@@ -415,9 +486,10 @@ static void tardis_face() {
   glEnd();
   
   //Window Divider thingys
-  glTranslatef(-103.0f, 0.0f, 0.0f);
+  glTranslatef(-102.5f, 0.0f, 1.0f);
   glColor3ub(40, 80, 132);
-  
+  glLineWidth(10);
+
   glBegin(GL_LINES);
   glVertex3f(70, 37.5, 0);
   glVertex3f(0, 37.5, 0);
