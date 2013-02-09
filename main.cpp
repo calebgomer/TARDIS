@@ -64,7 +64,6 @@ void triforce_bomb() {
   
   for (int i = 0; i < 1000; i++) {
     glPushMatrix();
-      glScalef(0.25, 0.25, 0.25);
     
     //randomize color
     int r = abs(triforces[i][0]*2.56)%256;
@@ -78,6 +77,10 @@ void triforce_bomb() {
     //randomize rotation
     glRotatef(((int)triforces[i][0])%360, ((int)triforces[i][0])%2,((int)triforces[i][0])%2,((int)triforces[i][0])%2);
     glRotatef(((int)triforces[i][0])%360+rotate_offset, 0, 1, 0);
+    
+    //randomize scale
+    float x = (abs(triforces[i][0])%100)/50.0;
+    glScalef(x,x,x);
     
     //draw the triforce
     glCallList(triforce_list);
@@ -135,9 +138,11 @@ void renderScene(void) {
   //TRIFORCE-BOMB
   triforce_bomb();
   
+//  glRotatef((rotate_offset%360)*2, 0, 1, 0);
   
   //TARDIS
   glScalef(0.05f, 0.05f, 0.05f);
+  glTranslatef(-125, 0, 125);
   
   //large top square on the top of the tardis
   //(behind police public call box square)
