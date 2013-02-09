@@ -24,7 +24,7 @@ float deltaAngle = 0.0f;
 float deltaMove = 0.0f;
 float deltaY = 0.0f;
 float deltaYY = 0.0f;
-
+bool wireToggle;
 GLuint tardis_face_list;
 
 void changeSize(int w, int h) {
@@ -383,6 +383,7 @@ void keyboardFunc (unsigned char key, int x, int y) {
     case 'q':
       exit(1);
       break;
+	
 
     case 'a' : deltaAngle = -0.01f; break;
 		case 'd' : deltaAngle = 0.01f; break;
@@ -396,7 +397,19 @@ void keyboardFunc (unsigned char key, int x, int y) {
 
 void releaseKeyboard (unsigned char key, int x, int y) {
   switch (key) {
-
+	  case 't':
+		  if(wireToggle){
+			  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			  wireToggle = false;
+			  break;
+		  }
+		  else
+		  {
+			  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			  wireToggle = true;
+			  break;
+		  }	
+		  break;
 		case 'a' :
 		case 'd' : deltaAngle = 0.0f;break;
 		case 'w' :
@@ -535,7 +548,7 @@ void init() {
 }
 
 int main(int argc, char **argv) {
-
+	wireToggle =false;
 	// init GLUT and create window
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
@@ -544,6 +557,7 @@ int main(int argc, char **argv) {
 	glutCreateWindow("TARDIS - Time and Relative Dimmension in Space");
   
   init(); //setup lists
+  
   
 	// register callbacks
 	glutDisplayFunc(renderScene);
