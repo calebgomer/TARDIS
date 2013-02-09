@@ -25,7 +25,12 @@ float deltaMove = 0.0f;
 float deltaY = 0.0f;
 float deltaYY = 0.0f;
 bool wireToggle;
+
+const int num_triforces = 1000;
+GLfloat triforces[num_triforces][3];
+
 GLuint tardis_face_list;
+GLuint triforce_list;
 
 void changeSize(int w, int h) {
   
@@ -51,32 +56,36 @@ void changeSize(int w, int h) {
 	glMatrixMode(GL_MODELVIEW);
 }
 
-void drawSnowMan() {
+int rotate_offset = 0;
+void triforce_bomb() {
+  rotate_offset++;
   
-	glColor3f(1.0f, 1.0f, 1.0f);
+  glPushMatrix();
   
-  // Draw Body
+  for (int i = 0; i < 1000; i++) {
+    glPushMatrix();
+      glScalef(0.25, 0.25, 0.25);
+    
+    //randomize color
+    int r = abs(triforces[i][0]*2.56)%256;
+    int g = abs(triforces[i][1]*2.56)%256;
+    int b = abs(triforces[i][2]*2.56)%256;
+    glColor3ub(r, g, b);
+    
+    //randomize position
+    glTranslatef(triforces[i][0], triforces[i][1], triforces[i][2]);
+    
+    //randomize rotation
+    glRotatef(((int)triforces[i][0])%360, ((int)triforces[i][0])%2,((int)triforces[i][0])%2,((int)triforces[i][0])%2);
+    glRotatef(((int)triforces[i][0])%360+rotate_offset, 0, 1, 0);
+    
+    //draw the triforce
+    glCallList(triforce_list);
+    
+    glPopMatrix();
+  }
   
-	glTranslatef(0.0f ,0.75f, 0.0f);
-	glutSolidSphere(0.75f,20,20);
-  
-  // Draw Head
-	glTranslatef(0.0f, 1.0f, 0.0f);
-	glutSolidSphere(0.25f,20,20);
-  
-  // Draw Eyes
-	glPushMatrix();
-	glColor3f(0.0f,0.0f,0.0f);
-	glTranslatef(0.05f, 0.10f, 0.18f);
-	glutSolidSphere(0.05f,10,10);
-	glTranslatef(-0.1f, 0.0f, 0.0f);
-	glutSolidSphere(0.05f,10,10);
-	glPopMatrix();
-  
-  // Draw Nose
-	glColor3f(1.0f, 0.5f , 0.5f);
-	glRotatef(0.0f,1.0f, 0.0f, 0.0f);
-	glutSolidCone(0.08f,0.5f,10,2);
+  glPopMatrix();
 }
 
 void computePos(float deltaMove) {
@@ -115,26 +124,19 @@ void renderScene(void) {
             0.0f, 1.0f,  0.0f);
   
   // Draw ground
-  
-	glColor3f(0.4f, 0.4f, 0.4f);
+	glColor3ub(0, 104, 10);
 	glBegin(GL_QUADS);
-  glVertex3f(-100.0f, 0.0f, -100.0f);
-  glVertex3f(-100.0f, 0.0f,  100.0f);
-  glVertex3f( 100.0f, 0.0f,  100.0f);
-  glVertex3f( 100.0f, 0.0f, -100.0f);
+  glVertex3f(-100.0f, -0.1f, -100.0f);
+  glVertex3f(-100.0f, -0.1f,  100.0f);
+  glVertex3f( 100.0f, -0.1f,  100.0f);
+  glVertex3f( 100.0f, -0.1f, -100.0f);
 	glEnd();
   
-  // Draw 36 SnowMen
-//  glScalef(3.0f, 3.0f, 3.0f);
+  //TRIFORCE-BOMB
+  triforce_bomb();
   
-	for(int i = -3; i < 3; i++)
-		for(int j=-3; j < 3; j++) {
-			glPushMatrix();
-			glTranslatef(i*10.0,0,j * 10.0);
-			drawSnowMan();
-			glPopMatrix();
-		}
-
+  
+  //TARDIS
   glScalef(0.05f, 0.05f, 0.05f);
   
   //large top square on the top of the tardis
@@ -143,7 +145,7 @@ void renderScene(void) {
   
   glTranslatef(5.0f, 380.0f, 5.0f);
   glBegin(GL_QUAD_STRIP);
-
+  
   glColor3ub(24, 47, 89);
   
   glVertex3f(240, 0, 0);
@@ -162,7 +164,7 @@ void renderScene(void) {
   glBegin(GL_QUADS);
   
   //top of this box
-  glColor3ub(33, 71, 120);
+  glColor3ub(24, 47, 89);
   
   glVertex3f(240, 40, 0);
   glVertex3f(240, 40, -240);
@@ -170,7 +172,7 @@ void renderScene(void) {
   glVertex3f(0, 40, 0);
   
   //bottom of this box
-  glColor3ub(33, 71, 120);
+  glColor3ub(22, 45, 87);
   
   glVertex3f(240, 0, 0);
   glVertex3f(0, 0, 0);
@@ -189,25 +191,25 @@ void renderScene(void) {
   //very top boxes
   glTranslatef(15,40,-15);
   glColor3ub(22, 45, 87);
-
-
+  
+  
   glBegin(GL_QUAD_STRIP);
-
+  
   glVertex3f(210, 0, 0);
   glVertex3f(210, 15, 0);
   glVertex3f(0, 0, 0);
   glVertex3f(0, 15, 0);
-
+  
   glVertex3f(0, 0, -210);
   glVertex3f(0, 15, -210);
-
+  
   glVertex3f(210, 0, -210);
   glVertex3f(210, 15, -210);
-
+  
   glVertex3f(210, 0, 0);
   glVertex3f(210, 15, 0);
   glEnd();
-
+  
   glBegin(GL_QUADS);
   
   //top of this box
@@ -218,27 +220,27 @@ void renderScene(void) {
   glVertex3f(0, 15, -210);
   glVertex3f(0, 15, 0);
   glEnd();
-
-
+  
+  
   glTranslatef(10,15,-10);
   glBegin(GL_QUAD_STRIP);
   glColor3ub(22, 45, 87);
-
+  
   glVertex3f(190, 0, 0);
   glVertex3f(190, 5, 0);
   glVertex3f(0, 0, 0);
   glVertex3f(0, 5, 0);
-
+  
   glVertex3f(0, 0, -190);
   glVertex3f(0, 5, -190);
-
+  
   glVertex3f(190, 0, -190);
   glVertex3f(190, 5, -190);
-
+  
   glVertex3f(190, 0, 0);
   glVertex3f(190, 5, 0);
   glEnd();
-
+  
   glBegin(GL_QUADS);
   
   //top of this box
@@ -249,10 +251,8 @@ void renderScene(void) {
   glVertex3f(0, 5, -190);
   glVertex3f(0, 5, 0);
   glEnd();
-
-
-  glPopMatrix();
   
+  glPopMatrix();
   
   //main box rectangle
   glPushMatrix();
@@ -263,25 +263,25 @@ void renderScene(void) {
   
   glVertex3f(230,0,0);//bottom right
   glVertex3f(230,370,0);//top right
-
+  
   glVertex3f(0,0,0);//bottom left
   glVertex3f(0,370,0);//top left
-
+  
   glColor3ub(32, 60, 105);
   
   glVertex3f(0,0,-230);
   glVertex3f(0,370,-230);
-
+  
   glVertex3f(230,0,-230);
   glVertex3f(230,370,-230);
-
+  
   glVertex3f(230,0,0);//bottom right
   glVertex3f(230,370,0);//top right
   
   glEnd();
   glPopMatrix();
   
-    glColor3ub(40, 80, 132);
+  glColor3ub(40, 80, 132);
   //base platform rectangle
   glPushMatrix();
   
@@ -312,10 +312,10 @@ void renderScene(void) {
   
   glVertex3f(5,10,-235);
   glVertex3f(10,15,-230);
-
+  
   glVertex3f(245,10,-235);
   glVertex3f(240,15,-230);
-
+  
   glVertex3f(245,10,5);
   glVertex3f(240,15,0);
   
@@ -335,7 +335,7 @@ void renderScene(void) {
   glTranslatef(-240, 0, -10);
   glCallList(tardis_face_list);
   glPopMatrix();
-
+  
   
   //right face
   glPushMatrix();
@@ -343,7 +343,7 @@ void renderScene(void) {
   glTranslatef(-10, 0, 240);
   glCallList(tardis_face_list);
   glPopMatrix();
-
+  
   //back face
   glPushMatrix();
   glRotatef(180.0f,0.0f, 1.0f, 0.0f);
@@ -383,8 +383,7 @@ void keyboardFunc (unsigned char key, int x, int y) {
     case 'q':
       exit(1);
       break;
-	
-
+      
     case 'a' : deltaAngle = -0.01f; break;
 		case 'd' : deltaAngle = 0.01f; break;
 		case 'w' : deltaMove = 3.0f; break;
@@ -397,18 +396,10 @@ void keyboardFunc (unsigned char key, int x, int y) {
 
 void releaseKeyboard (unsigned char key, int x, int y) {
   switch (key) {
+   //toggle wireframes
 	  case 't':
-		  if(wireToggle){
-			  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			  wireToggle = false;
-			  break;
-		  }
-		  else
-		  {
-			  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-			  wireToggle = true;
-			  break;
-		  }	
+      glPolygonMode(GL_FRONT_AND_BACK, (wireToggle)?GL_LINE:GL_FILL);
+      wireToggle = !wireToggle;
 		  break;
 		case 'a' :
 		case 'd' : deltaAngle = 0.0f;break;
@@ -418,6 +409,88 @@ void releaseKeyboard (unsigned char key, int x, int y) {
     default:
       break;
   }
+}
+
+static void triforce() {
+  
+  glCullFace(GL_BACK);
+  glEnable(GL_CULL_FACE);
+  
+  glPushMatrix();
+  
+  glTranslatef(-2, 0, -0.175);
+  
+  glBegin(GL_TRIANGLES); //make both triforce faces
+  
+  glVertex3f(1, 1, 0);
+  glVertex3f(2, 0, 0);
+  glVertex3f(0, 0, 0);
+  
+  glVertex3f(2, 2, 0);
+  glVertex3f(3, 1, 0);
+  glVertex3f(1, 1, 0);
+  
+  glVertex3f(3, 1, 0);
+  glVertex3f(4, 0, 0);
+  glVertex3f(2, 0, 0);
+  
+  glVertex3f(0, 0, 0.35);
+  glVertex3f(2, 0, 0.35);
+  glVertex3f(1, 1, 0.35);
+  
+  glVertex3f(1, 1, 0.35);
+  glVertex3f(3, 1, 0.35);
+  glVertex3f(2, 2, 0.35);
+  
+  glVertex3f(2, 0, 0.35);
+  glVertex3f(4, 0, 0.35);
+  glVertex3f(3, 1, 0.35);
+  
+  glEnd(); //end triforce faces
+  
+  glColor3ub(50, 50, 50);
+  
+  glBegin(GL_QUADS); //panels
+  
+  //make side panels
+  //left panel
+  glVertex3f(2, 2, 0.35);
+  glVertex3f(2, 2, 0);
+  glVertex3f(0, 0, 0);
+  glVertex3f(0, 0, 0.35);
+  //right panel
+  glVertex3f(4, 0, 0.35);
+  glVertex3f(4, 0, 0);
+  glVertex3f(2, 2, 0);
+  glVertex3f(2, 2, 0.35);
+  //bottom panel
+  glVertex3f(0, 0, 0.35);
+  glVertex3f(0, 0, 0);
+  glVertex3f(4, 0, 0);
+  glVertex3f(4, 0, 0.35);
+  
+  //make inside panels
+  //left panel
+  glVertex3f(2, 0, 0.35);
+  glVertex3f(2, 0, 0);
+  glVertex3f(1, 1, 0);
+  glVertex3f(1, 1, 0.35);
+  //right panel
+  glVertex3f(3, 1, 0.35);
+  glVertex3f(3, 1, 0);
+  glVertex3f(2, 0, 0);
+  glVertex3f(2, 0, 0.35);
+  //top panel
+  glVertex3f(3, 1, 0.35);
+  glVertex3f(1, 1, 0.35);
+  glVertex3f(1, 1, 0);
+  glVertex3f(3, 1, 0);
+  
+  glEnd();
+  
+  glPopMatrix();
+  
+  glDisable(GL_CULL_FACE);
 }
 
 static void tardis_face() {
@@ -502,7 +575,7 @@ static void tardis_face() {
   glTranslatef(-102.5f, 0.0f, 1.0f);
   glColor3ub(40, 80, 132);
   glLineWidth(10);
-
+  
   glBegin(GL_LINES);
   glVertex3f(70, 37.5, 0);
   glVertex3f(0, 37.5, 0);
@@ -545,19 +618,29 @@ void init() {
   glNewList(tardis_face_list, GL_COMPILE);
   tardis_face();
   glEndList();
+  
+  triforce_list = glGenLists(1);
+  glNewList(triforce_list, GL_COMPILE);
+  triforce();
+  glEndList();
 }
 
 int main(int argc, char **argv) {
-	wireToggle =false;
+	wireToggle = true;
+  for (int i = 0; i < num_triforces; i++) {
+    triforces[i][0]= rand()%200-100;
+    triforces[i][1]= rand()%100;
+    triforces[i][2]= rand()%200-100;
+  }
+  
 	// init GLUT and create window
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
-	glutInitWindowPosition(100,100);
-	glutInitWindowSize(1000,600);
-	glutCreateWindow("TARDIS - Time and Relative Dimmension in Space");
+	glutInitWindowPosition(0,0);
+	glutInitWindowSize(1280,800);
+	glutCreateWindow("TATARDIS - Triforces and Time and Relative Dimmension in Space");
   
   init(); //setup lists
-  
   
 	// register callbacks
 	glutDisplayFunc(renderScene);
