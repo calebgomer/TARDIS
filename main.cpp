@@ -347,7 +347,7 @@ void renderScene(void) {
   //back face
   glPushMatrix();
   glRotatef(180.0f,0.0f, 1.0f, 0.0f);
-  glTranslatef(-250, 0, 240);
+  glTranslatef(-250, 0, 230);
   glCallList(tardis_face_list);
   glPopMatrix();
   
@@ -536,7 +536,7 @@ static void tardis_face() {
   glVertex3f(50, 75, 0);
   glVertex3f(50, 0, 0);
   glEnd();
-
+  glLineWidth(1);
 }
 
 // setup lists
