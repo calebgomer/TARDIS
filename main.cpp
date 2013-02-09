@@ -24,12 +24,16 @@ float deltaAngle = 0.0f;
 float deltaMove = 0.0f;
 float deltaY = 0.0f;
 float deltaYY = 0.0f;
-bool wireToggle;
 
+bool wireToggle;
+int rotate_offset = 0;
 const int num_triforces = 1000;
 GLfloat triforces[num_triforces][3];
 
 GLuint tardis_face_list;
+GLuint tardis_window_list;
+GLuint tardis_panel_list;
+GLuint tardis_list;
 GLuint triforce_list;
 
 void changeSize(int w, int h) {
@@ -56,7 +60,7 @@ void changeSize(int w, int h) {
 	glMatrixMode(GL_MODELVIEW);
 }
 
-int rotate_offset = 0;
+
 void triforce_bomb() {
   rotate_offset++;
   
@@ -66,9 +70,9 @@ void triforce_bomb() {
     glPushMatrix();
     
     //randomize color
-    int r = abs(triforces[i][0]*2.56)%256;
-    int g = abs(triforces[i][1]*2.56)%256;
-    int b = abs(triforces[i][2]*2.56)%256;
+    int r = (int)abs(triforces[i][0]*2.56)%256;
+    int g = (int)abs(triforces[i][1]*2.56)%256;
+    int b = (int)abs(triforces[i][2]*2.56)%256;
     glColor3ub(r, g, b);
     
     //randomize position
@@ -79,7 +83,7 @@ void triforce_bomb() {
     glRotatef(((int)triforces[i][0])%360+rotate_offset, 0, 1, 0);
     
     //randomize scale
-    float x = (abs(triforces[i][0])%100)/50.0;
+    float x = ((int)abs(triforces[i][0])%100)/50.0;
     glScalef(x,x,x);
     
     //draw the triforce
@@ -144,7 +148,224 @@ void renderScene(void) {
   glScalef(0.05f, 0.05f, 0.05f);
   glTranslatef(-125, 0, 125);
   
-  //large top square on the top of the tardis
+ glCallList(tardis_list);
+  
+	glutSwapBuffers();
+}
+
+void pressKey(int key, int xx, int yy) {
+  
+	switch (key) {
+		case GLUT_KEY_LEFT : deltaYY = -0.2f; break;
+		case GLUT_KEY_RIGHT : deltaYY = +0.2f; break;
+		case GLUT_KEY_UP : deltaY = +5.0f; break;
+		case GLUT_KEY_DOWN : deltaY = -5.0f; break;
+    case GLUT_KEY_F1 : deltaY = +50.0f; break;
+    case GLUT_KEY_F2 : deltaY = -50.0f; break;
+	}
+}
+
+void releaseKey(int key, int x, int y) {
+  
+	switch (key) {
+		case GLUT_KEY_LEFT : break;
+		case GLUT_KEY_RIGHT : break;
+		case GLUT_KEY_UP : break;
+		case GLUT_KEY_DOWN : break;
+	}
+}
+
+void keyboardFunc (unsigned char key, int x, int y) {
+  switch (key) {
+    case 033:
+    case 'q':
+      exit(1);
+      break;
+      
+    case 'a' : deltaAngle = -0.01f; break;
+		case 'd' : deltaAngle = 0.01f; break;
+		case 'w' : deltaMove = 3.0f; break;
+		case 's' : deltaMove = -3.0f; break;
+      
+    default:
+      break;
+  }
+}
+
+void releaseKeyboard (unsigned char key, int x, int y) {
+  switch (key) {
+   //toggle wireframes
+	  case 't':
+      glPolygonMode(GL_FRONT_AND_BACK, (wireToggle)?GL_LINE:GL_FILL);
+      wireToggle = !wireToggle;
+		  break;
+		case 'a' :
+		case 'd' : deltaAngle = 0.0f;break;
+		case 'w' :
+		case 's' : deltaMove = 0;break;
+      
+    default:
+      break;
+  }
+}
+
+static void triforce() {
+  
+  glCullFace(GL_BACK);
+  glEnable(GL_CULL_FACE);
+  
+  glPushMatrix();
+  
+  glTranslatef(-2, 0, -0.175);
+  
+  glBegin(GL_TRIANGLES); //make both triforce faces
+  
+  glVertex3f(1, 1, 0);
+  glVertex3f(2, 0, 0);
+  glVertex3f(0, 0, 0);
+  
+  glVertex3f(2, 2, 0);
+  glVertex3f(3, 1, 0);
+  glVertex3f(1, 1, 0);
+  
+  glVertex3f(3, 1, 0);
+  glVertex3f(4, 0, 0);
+  glVertex3f(2, 0, 0);
+  
+  glVertex3f(0, 0, 0.35);
+  glVertex3f(2, 0, 0.35);
+  glVertex3f(1, 1, 0.35);
+  
+  glVertex3f(1, 1, 0.35);
+  glVertex3f(3, 1, 0.35);
+  glVertex3f(2, 2, 0.35);
+  
+  glVertex3f(2, 0, 0.35);
+  glVertex3f(4, 0, 0.35);
+  glVertex3f(3, 1, 0.35);
+  
+  glEnd(); //end triforce faces
+  
+  glColor3ub(50, 50, 50);
+  
+  glBegin(GL_QUADS); //panels
+  
+  //make side panels
+  //left panel
+  glVertex3f(2, 2, 0.35);
+  glVertex3f(2, 2, 0);
+  glVertex3f(0, 0, 0);
+  glVertex3f(0, 0, 0.35);
+  //right panel
+  glVertex3f(4, 0, 0.35);
+  glVertex3f(4, 0, 0);
+  glVertex3f(2, 2, 0);
+  glVertex3f(2, 2, 0.35);
+  //bottom panel
+  glVertex3f(0, 0, 0.35);
+  glVertex3f(0, 0, 0);
+  glVertex3f(4, 0, 0);
+  glVertex3f(4, 0, 0.35);
+  
+  //make inside panels
+  //left panel
+  glVertex3f(2, 0, 0.35);
+  glVertex3f(2, 0, 0);
+  glVertex3f(1, 1, 0);
+  glVertex3f(1, 1, 0.35);
+  //right panel
+  glVertex3f(3, 1, 0.35);
+  glVertex3f(3, 1, 0);
+  glVertex3f(2, 0, 0);
+  glVertex3f(2, 0, 0.35);
+  //top panel
+  glVertex3f(3, 1, 0.35);
+  glVertex3f(1, 1, 0.35);
+  glVertex3f(1, 1, 0);
+  glVertex3f(3, 1, 0);
+  
+  glEnd();
+  
+  glPopMatrix();
+  
+  glDisable(GL_CULL_FACE);
+}
+
+static void tardis_panel(){
+	glBegin(GL_QUADS);
+ 
+	glVertex3f(0, 0, 0);
+	glVertex3f(0, 60, 0);  
+	glVertex3f(62.5, 60, 0);
+	glVertex3f(62.5, 0, 0); 
+	glEnd();
+}
+
+static void tardis_window(){
+	glColor3ub(255, 255, 255);
+    glBegin(GL_QUADS);
+    glVertex3f(70, 0, 0);
+    glVertex3f(0, 0, 0);
+    glVertex3f(0, 75, 0);
+    glVertex3f(70, 75, 0);
+    glEnd();
+
+    glTranslatef(0, 0, 0.1f);
+    glColor3ub(40, 80, 132);
+    glLineWidth(10);
+  
+    glBegin(GL_LINES);
+    glVertex3f(70, 37.5, 0);
+    glVertex3f(0, 37.5, 0);
+    glEnd();
+  
+  glBegin(GL_LINES);
+  glVertex3f(22.5, 75, 0);
+  glVertex3f(22.5, 0, 0);
+  glEnd();
+  
+  glBegin(GL_LINES);
+  glVertex3f(50, 75, 0);
+  glVertex3f(50, 0, 0);
+  glEnd();
+  glLineWidth(1);
+}
+
+static void tardis_face() {
+  
+  //panels inside main box
+  
+  glColor3ub(33, 71, 120);
+  
+  glTranslatef(45.0f, 50.0f, 1.0f);
+  glCallList(tardis_panel_list);
+  
+  glTranslatef(100.0f, 0.0f, 0.0f);
+  glCallList(tardis_panel_list);
+  
+  glTranslatef(-100.0f, 75.0f, 0.0f);
+  glCallList(tardis_panel_list);
+  
+  glTranslatef(100.0f, 0.0f, 0.0f);
+  glCallList(tardis_panel_list);
+  
+  glTranslatef(-100.0f, 75.0f, 0.0f);
+  glCallList(tardis_panel_list);
+  
+  glTranslatef(100.0f, 0.0f, 0.0f);
+  glCallList(tardis_panel_list);
+  
+  //WindowPanes
+  
+  glTranslatef(-105.0f, 75.0f, 0.0f);
+  glCallList(tardis_window_list);
+
+  glTranslatef(102.5f, 0.0f, 0.0f);
+  glCallList(tardis_window_list);
+}
+
+static void tardis(){
+	   //large top square on the top of the tardis
   //(behind police public call box square)
   glPushMatrix();
   
@@ -169,7 +390,7 @@ void renderScene(void) {
   glBegin(GL_QUADS);
   
   //top of this box
-  glColor3ub(24, 47, 89);
+  glColor3ub(33, 71, 120);
   
   glVertex3f(240, 40, 0);
   glVertex3f(240, 40, -240);
@@ -177,7 +398,7 @@ void renderScene(void) {
   glVertex3f(0, 40, 0);
   
   //bottom of this box
-  glColor3ub(22, 45, 87);
+  glColor3ub(33, 71, 120);
   
   glVertex3f(240, 0, 0);
   glVertex3f(0, 0, 0);
@@ -355,274 +576,30 @@ void renderScene(void) {
   glTranslatef(-250, 0, 230);
   glCallList(tardis_face_list);
   glPopMatrix();
-  
-	glutSwapBuffers();
-}
-
-
-void pressKey(int key, int xx, int yy) {
-  
-	switch (key) {
-		case GLUT_KEY_LEFT : deltaYY = -0.2f; break;
-		case GLUT_KEY_RIGHT : deltaYY = +0.2f; break;
-		case GLUT_KEY_UP : deltaY = +5.0f; break;
-		case GLUT_KEY_DOWN : deltaY = -5.0f; break;
-    case GLUT_KEY_F1 : deltaY = +50.0f; break;
-    case GLUT_KEY_F2 : deltaY = -50.0f; break;
-	}
-}
-
-void releaseKey(int key, int x, int y) {
-  
-	switch (key) {
-		case GLUT_KEY_LEFT : break;
-		case GLUT_KEY_RIGHT : break;
-		case GLUT_KEY_UP : break;
-		case GLUT_KEY_DOWN : break;
-	}
-}
-
-void keyboardFunc (unsigned char key, int x, int y) {
-  switch (key) {
-    case 033:
-    case 'q':
-      exit(1);
-      break;
-      
-    case 'a' : deltaAngle = -0.01f; break;
-		case 'd' : deltaAngle = 0.01f; break;
-		case 'w' : deltaMove = 3.0f; break;
-		case 's' : deltaMove = -3.0f; break;
-      
-    default:
-      break;
-  }
-}
-
-void releaseKeyboard (unsigned char key, int x, int y) {
-  switch (key) {
-   //toggle wireframes
-	  case 't':
-      glPolygonMode(GL_FRONT_AND_BACK, (wireToggle)?GL_LINE:GL_FILL);
-      wireToggle = !wireToggle;
-		  break;
-		case 'a' :
-		case 'd' : deltaAngle = 0.0f;break;
-		case 'w' :
-		case 's' : deltaMove = 0;break;
-      
-    default:
-      break;
-  }
-}
-
-static void triforce() {
-  
-  glCullFace(GL_BACK);
-  glEnable(GL_CULL_FACE);
-  
-  glPushMatrix();
-  
-  glTranslatef(-2, 0, -0.175);
-  
-  glBegin(GL_TRIANGLES); //make both triforce faces
-  
-  glVertex3f(1, 1, 0);
-  glVertex3f(2, 0, 0);
-  glVertex3f(0, 0, 0);
-  
-  glVertex3f(2, 2, 0);
-  glVertex3f(3, 1, 0);
-  glVertex3f(1, 1, 0);
-  
-  glVertex3f(3, 1, 0);
-  glVertex3f(4, 0, 0);
-  glVertex3f(2, 0, 0);
-  
-  glVertex3f(0, 0, 0.35);
-  glVertex3f(2, 0, 0.35);
-  glVertex3f(1, 1, 0.35);
-  
-  glVertex3f(1, 1, 0.35);
-  glVertex3f(3, 1, 0.35);
-  glVertex3f(2, 2, 0.35);
-  
-  glVertex3f(2, 0, 0.35);
-  glVertex3f(4, 0, 0.35);
-  glVertex3f(3, 1, 0.35);
-  
-  glEnd(); //end triforce faces
-  
-  glColor3ub(50, 50, 50);
-  
-  glBegin(GL_QUADS); //panels
-  
-  //make side panels
-  //left panel
-  glVertex3f(2, 2, 0.35);
-  glVertex3f(2, 2, 0);
-  glVertex3f(0, 0, 0);
-  glVertex3f(0, 0, 0.35);
-  //right panel
-  glVertex3f(4, 0, 0.35);
-  glVertex3f(4, 0, 0);
-  glVertex3f(2, 2, 0);
-  glVertex3f(2, 2, 0.35);
-  //bottom panel
-  glVertex3f(0, 0, 0.35);
-  glVertex3f(0, 0, 0);
-  glVertex3f(4, 0, 0);
-  glVertex3f(4, 0, 0.35);
-  
-  //make inside panels
-  //left panel
-  glVertex3f(2, 0, 0.35);
-  glVertex3f(2, 0, 0);
-  glVertex3f(1, 1, 0);
-  glVertex3f(1, 1, 0.35);
-  //right panel
-  glVertex3f(3, 1, 0.35);
-  glVertex3f(3, 1, 0);
-  glVertex3f(2, 0, 0);
-  glVertex3f(2, 0, 0.35);
-  //top panel
-  glVertex3f(3, 1, 0.35);
-  glVertex3f(1, 1, 0.35);
-  glVertex3f(1, 1, 0);
-  glVertex3f(3, 1, 0);
-  
-  glEnd();
-  
-  glPopMatrix();
-  
-  glDisable(GL_CULL_FACE);
-}
-
-static void tardis_face() {
-  
-  //panels inside main box
-  
-  glColor3ub(33, 71, 120);
-  
-  glTranslatef(45.0f, 50.0f, 1.0f);
-  glBegin(GL_QUAD_STRIP);
-  glVertex3f(62.5, 0, 0);
-  glVertex3f(62.5, 60, 0);
-  glVertex3f(0, 0, 0);
-  glVertex3f(0, 60, 0);
-  
-  glEnd();
-  
-  glTranslatef(100.0f, 0.0f, 0.0f);
-  glBegin(GL_QUAD_STRIP);
-  glVertex3f(62.5, 0, 0);
-  glVertex3f(62.5, 60, 0);
-  glVertex3f(0, 0, 0);
-  glVertex3f(0, 60, 0);
-  
-  glEnd();
-  
-  glTranslatef(-100.0f, 75.0f, 0.0f);
-  glBegin(GL_QUAD_STRIP);
-  glVertex3f(62.5, 0, 0);
-  glVertex3f(62.5, 60, 0);
-  glVertex3f(0, 0, 0);
-  glVertex3f(0, 60, 0);
-  
-  glEnd();
-  
-  glTranslatef(100.0f, 0.0f, 0.0f);
-  glBegin(GL_QUAD_STRIP);
-  glVertex3f(62.5, 0, 0);
-  glVertex3f(62.5, 60, 0);
-  glVertex3f(0, 0, 0);
-  glVertex3f(0, 60, 0);
-  
-  glEnd();
-  
-  glTranslatef(-100.0f, 75.0f, 0.0f);
-  glBegin(GL_QUAD_STRIP);
-  glVertex3f(62.5, 0, 0);
-  glVertex3f(62.5, 60, 0);
-  glVertex3f(0, 0, 0);
-  glVertex3f(0, 60, 0);
-  
-  glEnd();
-  
-  glTranslatef(100.0f, 0.0f, 0.0f);
-  glBegin(GL_QUAD_STRIP);
-  glVertex3f(62.5, 0, 0);
-  glVertex3f(62.5, 60, 0);
-  glVertex3f(0, 0, 0);
-  glVertex3f(0, 60, 0);
-  
-  glEnd();
-  
-  //WindowPanes( will be divided later)
-  glColor3ub(255, 255, 255);
-  glTranslatef(-105.0f, 75.0f, 0.0f);
-  glBegin(GL_QUAD_STRIP);
-  glVertex3f(70, 0, 0);
-  glVertex3f(70, 75, 0);
-  glVertex3f(0, 0, 0);
-  glVertex3f(0, 75, 0);
-  glEnd();
-  
-  glTranslatef(102.5f, 0.0f, 0.0f);
-  glBegin(GL_QUAD_STRIP);
-  glVertex3f(70, 0, 0);
-  glVertex3f(70, 75, 0);
-  glVertex3f(0, 0, 0);
-  glVertex3f(0, 75, 0);
-  glEnd();
-  
-  //Window Divider thingys
-  glTranslatef(-102.5f, 0.0f, 1.0f);
-  glColor3ub(40, 80, 132);
-  glLineWidth(10);
-  
-  glBegin(GL_LINES);
-  glVertex3f(70, 37.5, 0);
-  glVertex3f(0, 37.5, 0);
-  glEnd();
-  
-  glBegin(GL_LINES);
-  glVertex3f(22.5, 75, 0);
-  glVertex3f(22.5, 0, 0);
-  glEnd();
-  
-  glBegin(GL_LINES);
-  glVertex3f(50, 75, 0);
-  glVertex3f(50, 0, 0);
-  glEnd();
-  
-  //right window
-  glTranslatef(102.0f, 0.0f, 0.0f);
-  glColor3ub(40, 80, 132);
-  
-  glBegin(GL_LINES);
-  glVertex3f(71, 37.5, 0);
-  glVertex3f(0, 37.5, 0);
-  glEnd();
-  
-  glBegin(GL_LINES);
-  glVertex3f(22.5, 75, 0);
-  glVertex3f(22.5, 0, 0);
-  glEnd();
-  
-  glBegin(GL_LINES);
-  glVertex3f(50, 75, 0);
-  glVertex3f(50, 0, 0);
-  glEnd();
-  glLineWidth(1);
 }
 
 // setup lists
 void init() {
+tardis_panel_list = glGenLists(1);
+  glNewList(tardis_panel_list,GL_COMPILE);
+  tardis_panel();
+  glEndList();
+
+  tardis_window_list = glGenLists(1);
+  glNewList(tardis_window_list,GL_COMPILE);
+  tardis_window();
+  glEndList();
+
   tardis_face_list = glGenLists(1);
   glNewList(tardis_face_list, GL_COMPILE);
   tardis_face();
   glEndList();
+  
+  tardis_list = glGenLists(1);
+  glNewList(tardis_list,GL_COMPILE);
+  tardis();
+  glEndList();
+
   
   triforce_list = glGenLists(1);
   glNewList(triforce_list, GL_COMPILE);
