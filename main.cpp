@@ -1,16 +1,20 @@
 #include <stdlib.h>
+#include <stdio.h>  
+#include <stdarg.h> 
 #include <math.h>
+#include <iostream>
+#include <sstream>
+#include <vector>
+#include <map>
+#include <utility>
+#include <string>
 
 #ifdef __APPLE__
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>
 #endif
-#include <iostream>
-#include <sstream>
-#include <vector>
-#include <map>
-#include <utility>
+using namespace std;
 
 // angle of rotation for the camera direction
 float angle = 0.0f;
@@ -30,14 +34,20 @@ bool wireToggle;
 const int num_triforces = 1000;
 GLfloat triforces[num_triforces][3];
 
-GLuint tardis_face_list;
-GLuint tardis_window_list;
-GLuint tardis_panel_list;
-GLuint tardis_list;
+GLuint tardis_face_list, tardis_window_list, tardis_panel_list, tardis_blackpanel_list, tardis_list;
 
 GLuint triforce_list;
 GLuint triangle_list;
+GLUquadric* qobj;
 
+static void printw(string word){
+	
+	
+	for(int i=0; i < word.length();i++){
+		glutStrokeCharacter(GLUT_STROKE_ROMAN, word[i]);
+	}
+
+}
 void changeSize(int w, int h) {
   
 	// Prevent a divide by zero, when window is too short
@@ -214,7 +224,6 @@ void keyboardFunc (unsigned char key, int x, int y) {
   }
 }
 
-
 /******************************************
  * Release Keyboard
  * One of three triangles in a triforce
@@ -235,6 +244,7 @@ void releaseKeyboard (unsigned char key, int x, int y) {
       break;
   }
 }
+
 
 
 /******************************************
@@ -273,7 +283,6 @@ static void triangle(float thickness) {
   glPopMatrix();
 }
 
-
 /******************************************
  * Triforce
  * A symbol of power from the Legend of Zelda
@@ -296,6 +305,41 @@ static void triforce() {
   glPopMatrix();
 }
 
+static void tardis_blackpanel(){
+	glBegin(GL_QUADS);
+	glColor3ub(0,0,0);
+  glVertex3f(15, 35, 5.1f);
+  glVertex3f(15, 7, 5.1f);
+  glVertex3f(225, 7, 5.1f);
+  glVertex3f(225, 35, 5.1f);
+  glEnd();
+  glColor3ub(255,255,255);
+
+  glPushMatrix();
+  glTranslatef(30,10,5.5f);
+  glScalef(0.2, 0.2, 0.2);
+  printw("POLICE");
+  glPopMatrix();
+
+  glPushMatrix();
+  glTranslatef(155,10,5.5f);
+  glScalef(0.2, 0.2, 0.2);
+  printw("BOX");
+  glPopMatrix();
+
+  glPushMatrix();
+  glTranslatef(120,23,5.5f);
+  glScalef(0.07, 0.07, 0.07);
+  printw("PUBLIC");
+  glPopMatrix();
+
+  glPushMatrix();
+  glTranslatef(124,13,5.5f);
+  glScalef(0.07, 0.07, 0.07);
+  printw("CALL");
+  glPopMatrix();
+}
+
 static void tardis_panel() {
 	glBegin(GL_QUADS);
 	glVertex3f(0, 0, 0);
@@ -303,6 +347,7 @@ static void tardis_panel() {
 	glVertex3f(62.5, 60, 0);
 	glVertex3f(0, 60, 0);
 	glEnd();
+	
 }
 
 static void tardis_window() {
@@ -341,6 +386,13 @@ static void tardis_face() {
   
   glColor3ub(33, 71, 120);
   
+  glBegin(GL_QUADS);
+  glVertex3f(132.5, 10, 1.5);
+	glVertex3f(122.5, 10, 1.5);
+	glVertex3f(122.5, 400, 1.5);
+	glVertex3f(132.5, 400, 1.5);
+  glEnd();
+
   glTranslatef(45.0f, 50.0f, 1.0f);
   glCallList(tardis_panel_list);
   
@@ -408,15 +460,42 @@ static void tardis(){
   glVertex3f(0, 0, 0);
   glVertex3f(0, 0, -240);
   glVertex3f(240, 0, -240);
+
+  glEnd();
+
+
+
   
   //black back behind 'police box' text
-  glColor3ub(0, 0, 0);
-  glVertex3f(20, 35, 5.1f);
-  glVertex3f(20, 7, 5.1f);
-  glVertex3f(215, 7, 5.1f);
-  glVertex3f(215, 35, 5.1f);
   
-  glEnd();
+  glPushMatrix();
+    //front face
+  glTranslatef(0,0,-5);
+  glCallList(tardis_blackpanel_list);
+  glPopMatrix();
+  glPushMatrix();
+  //left face
+  glRotatef(-90.0f,0.0f, 1.0f, 0.0f);
+  glTranslatef(-240, 0, -5);
+  glCallList(tardis_blackpanel_list);
+  glPopMatrix();
+  glPushMatrix();
+  //right face
+  glRotatef(90.0f,0.0f, 1.0f, 0.0f);
+  glTranslatef(0, 0, 235);
+ glCallList(tardis_blackpanel_list);
+  glPopMatrix();
+  glPushMatrix();
+  //back face
+  glRotatef(180.0f,0.0f, 1.0f, 0.0f);
+  glTranslatef(-240, 0, 235);
+  glCallList(tardis_blackpanel_list);
+  
+  glPopMatrix();
+
+
+
+
   
   //very top boxes
   glTranslatef(15,40,-15);
@@ -482,6 +561,56 @@ static void tardis(){
   glVertex3f(0, 5, 0);
   glEnd();
   
+  glColor3ub(32, 60, 105);
+  glTranslatef(82.5,5,-82.5);
+	glLineWidth(10);
+  glBegin(GL_LINES);
+  glVertex3f(0, 0, 0);
+  glVertex3f(0, 27.5, 0);
+  glEnd();
+  glBegin(GL_LINES);
+  glVertex3f(25, 0, 0);
+  glVertex3f(25, 27.5, 0);
+  glEnd();
+  glBegin(GL_LINES);
+  glVertex3f(25, 0, -25);
+  glVertex3f(25, 27.5, -25);
+  glEnd();
+  glBegin(GL_LINES);
+  glVertex3f(0, 0, -25);
+  glVertex3f(0, 27.5, -25);
+  glEnd();
+  glLineWidth(0);
+  glBegin(GL_TRIANGLE_FAN);
+  glVertex3f(12.5, 35, -12.5);
+  glVertex3f(-2.5, 27.5, 2.5);
+  glVertex3f(-2.5, 27.5, -27.5);
+  glVertex3f(27.5, 27.5, -27.5);
+  glVertex3f(27.5, 27.5, 2.5);
+  glVertex3f(-2.5, 27.5, 2.5);
+  glEnd();
+  glColor3ub(33, 71, 120);
+  glBegin(GL_LINES);
+  glVertex3f(12.5, 35, -12.5);
+  glVertex3f(-2.5, 27.5, 2.5);
+  glEnd();
+  glBegin(GL_LINES);
+  glVertex3f(12.5, 35, -12.5);
+  glVertex3f(-2.5, 27.5, -27.5);
+  glEnd();
+  glBegin(GL_LINES);
+  glVertex3f(12.5, 35, -12.5);
+   glVertex3f(27.5, 27.5, -27.5);
+  glEnd();
+  glBegin(GL_LINES);
+  glVertex3f(12.5, 35, -12.5);
+  glVertex3f(27.5, 27.5, 2.5);
+  glEnd();
+
+  glColor3ub(179,200,255);
+  glTranslatef(12.5,0,-12.5);
+  glRotatef(-90,1,0,0);
+  gluCylinder(qobj, 10,10,27.5,120,160);
   glPopMatrix();
   
   //main box rectangle
@@ -557,6 +686,14 @@ static void tardis(){
   //front face
   glPushMatrix();
   glCallList(tardis_face_list);
+  glTranslatef(-91,-70,1);
+  glColor3ub(208,206,217);
+  glBegin(GL_QUADS);
+  glVertex3f(50,0,0);
+  glVertex3f(0,0,0);
+  glVertex3f(0,50,0);
+  glVertex3f(50,50,0);
+  glEnd();
   glPopMatrix();
   
   //left face
@@ -581,10 +718,19 @@ static void tardis(){
   glCallList(tardis_face_list);
   glPopMatrix();
 }
-
-
 // setup lists
 void init() {
+
+	qobj = gluNewQuadric();
+	gluQuadricDrawStyle(qobj, GLU_FILL);
+  gluQuadricNormals(qobj, GLU_SMOOTH);
+	gluQuadricOrientation(qobj, GLU_OUTSIDE);
+
+	tardis_blackpanel_list = glGenLists(1);
+    glNewList(tardis_blackpanel_list,GL_COMPILE);
+    tardis_blackpanel();
+    glEndList();
+  
   tardis_panel_list = glGenLists(1);
   glNewList(tardis_panel_list,GL_COMPILE);
   tardis_panel();
@@ -631,8 +777,8 @@ int main(int argc, char **argv) {
 	glutInitWindowSize(1280,800);
 	glutCreateWindow("TATARDIS - Triforces and Time and Relative Dimmension in Space");
   
-  glPolygonMode (GL_FRONT, GL_FILL);
-  glPolygonMode (GL_BACK, GL_LINE);
+  //glPolygonMode (GL_FRONT, GL_FILL);
+  //glPolygonMode (GL_BACK, GL_LINE);
   
   init(); //setup lists
   
@@ -657,3 +803,5 @@ int main(int argc, char **argv) {
   
 	return 1;
 }
+
+
