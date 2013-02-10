@@ -622,6 +622,9 @@ int main(int argc, char **argv) {
 	glutInitWindowSize(1280,800);
 	glutCreateWindow("TATARDIS - Triforces and Time and Relative Dimmension in Space");
   
+  glPolygonMode (GL_FRONT, GL_FILL);
+  glPolygonMode (GL_BACK, GL_LINE);
+  
   init(); //setup lists
   
 	// register callbacks
