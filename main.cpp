@@ -1,13 +1,14 @@
+#include <cmath>
 #include <stdlib.h>
 #include <stdio.h>  
 #include <stdarg.h> 
-#include <math.h>
 #include <iostream>
 #include <sstream>
 #include <vector>
 #include <map>
 #include <utility>
 #include <string>
+#include "SOIL.h"
 
 #ifdef __APPLE__
 #include <GLUT/glut.h>
@@ -72,24 +73,24 @@ void changeSize(int w, int h) {
 	glMatrixMode(GL_MODELVIEW);
 }
 
-//static GLuint LoadPNG(char* filename)
-//{
-//  GLuint texture = SOIL_load_OGL_texture
-//  (
-//   filename,
-//   SOIL_LOAD_AUTO,
-//   SOIL_CREATE_NEW_ID,
-//   SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT
-//   );
-//  
-//  if (texture == 0)
-//    Log("Texture Load Error: " + string(filename));
-//  
-//  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-//  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//  
-//  return texture;
-//}
+static GLuint LoadPNG(char* filename)
+{
+  GLuint texture = SOIL_load_OGL_texture
+  (
+   filename,
+   SOIL_LOAD_AUTO,
+   SOIL_CREATE_NEW_ID,
+   SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT
+   );
+  
+  if (texture == 0)
+    printf("Texture Load Error: %s", filename);
+  
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  
+  return texture;
+}
 
 
 void triforce_bomb() {
