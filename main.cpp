@@ -32,18 +32,26 @@ float deltaYY = 0.0f;
 int rotate_offset = 0;
 bool wireToggle;
 
-const int num_triforces = 1000;
-GLfloat triforces[num_triforces][3];
-
-GLuint tardis_face_list, tardis_window_list, tardis_panel_list, tardis_blackpanel_list, tardis_list;
-
-GLuint triforce_list;
-GLuint triangle_list;
+//triforce light thingy
 GLUquadric* qobj;
 
+//tardis lists
+GLuint tardis_face_list, tardis_window_list, tardis_panel_list, tardis_blackpanel_list, tardis_list;
+
+//triforce stuff
+GLuint triforce_list;
+GLuint triangle_list;
+const int num_triforces = 1000;
+const int num_tardises = 10;
+GLfloat triforces[num_triforces][3];
+
+//textures
+GLuint ground_texture;
+GLuint dw_texture;
+
+
+/**print a word*/
 static void printw(string word){
-	
-	
 	for(int i=0; i < word.length();i++){
 		glutStrokeCharacter(GLUT_STROKE_ROMAN, word[i]);
 	}
@@ -98,13 +106,13 @@ void triforce_bomb() {
   
   glPushMatrix();
   
-  for (int i = 0; i < 1000; i++) {
+  for (int i = num_tardises; i < num_triforces; i++) {
     glPushMatrix();
     
     //randomize color
-    int r = (int)abs(triforces[i][0]*2.56)%256;
-    int g = (int)abs(triforces[i][1]*2.56)%256;
-    int b = (int)abs(triforces[i][2]*2.56)%256;
+    int r = min(255,max(0,((int)abs(triforces[i][0]*2.56)%256+abs(((rotate_offset%50)-25)))));
+    int g = min(255,max(0,((int)abs(triforces[i][1]*2.56)%256 + abs(((rotate_offset%50)-25)))));
+    int b = min(255,max(0,((int)abs(triforces[i][2]*2.56)%256 + abs(((rotate_offset%50)-25)))));
     glColor3ub(r, g, b);
     
     //randomize position
@@ -120,6 +128,44 @@ void triforce_bomb() {
     
     //draw the triforce
     glCallList(triforce_list);
+
+    glScalef(1, 1, 1);
+    
+    glPopMatrix();
+  }
+  
+  glPopMatrix();
+}
+
+void tardis_bomb() {
+  rotate_offset++;
+  
+  glPushMatrix();
+  
+  for (int i = 0; i < num_tardises; i++) {
+    glPushMatrix();
+    
+    //randomize color
+    int r = min(255,max(0,((int)abs(triforces[i][0]*2.56)%256+abs(((rotate_offset%50)-25)))));
+    int g = min(255,max(0,((int)abs(triforces[i][1]*2.56)%256 + abs(((rotate_offset%50)-25)))));
+    int b = min(255,max(0,((int)abs(triforces[i][2]*2.56)%256 + abs(((rotate_offset%50)-25)))));
+    glColor3ub(r, g, b);
+    
+    //randomize position
+    glTranslatef(triforces[i][0], triforces[i][1], triforces[i][2]);
+    
+    //randomize rotation
+    glRotatef(((int)triforces[i][0])%360, ((int)triforces[i][0])%2,((int)triforces[i][0])%2,((int)triforces[i][0])%2);
+    glRotatef(((int)triforces[i][0])%360+rotate_offset, 0, 1, 0);
+    
+    //randomize scale
+    glScalef(0.05, 0.05, 0.05);
+    
+    //draw the tardis
+    glTranslatef(-125, 0, 125);
+    glCallList(tardis_list);
+    
+    glScalef(1, 1, 1);
     
     glPopMatrix();
   }
@@ -162,17 +208,25 @@ void renderScene(void) {
             x+lx, yy,  z+lz,
             0.0f, 1.0f,  0.0f);
   
+  
   // Draw ground
-	glColor3ub(0, 104, 10);
+  glEnable(GL_TEXTURE_2D);
+	glColor3ub(255, 255, 255);
+  glBindTexture(GL_TEXTURE_2D, ground_texture);
 	glBegin(GL_QUADS);
-  glVertex3f(-100.0f, -0.1f, -100.0f);
-  glVertex3f(-100.0f, -0.1f,  100.0f);
-  glVertex3f( 100.0f, -0.1f,  100.0f);
-  glVertex3f( 100.0f, -0.1f, -100.0f);
+  glTexCoord3f(0,0,0); glVertex3f(-100.0f, -0.1f, -100.0f);
+  glTexCoord3f(1,0,0); glVertex3f(-100.0f, -0.1f,  100.0f);
+  glTexCoord3f(1,1,0); glVertex3f( 100.0f, -0.1f,  100.0f);
+  glTexCoord3f(0,1,0); glVertex3f( 100.0f, -0.1f, -100.0f);
 	glEnd();
+  glDisable(GL_TEXTURE_2D);
+
   
   //TRIFORCE-BOMB
   triforce_bomb();
+  
+  //FLOATING TARDISES
+  tardis_bomb();
   
 //  glRotatef((rotate_offset%240)*1.5, 0, 1, 0);
   
@@ -585,9 +639,9 @@ static void tardis(){
   glBegin(GL_TRIANGLE_FAN);
   glVertex3f(12.5, 35, -12.5);
   glVertex3f(-2.5, 27.5, 2.5);
-  glVertex3f(-2.5, 27.5, -27.5);
-  glVertex3f(27.5, 27.5, -27.5);
   glVertex3f(27.5, 27.5, 2.5);
+  glVertex3f(27.5, 27.5, -27.5);
+  glVertex3f(-2.5, 27.5, -27.5);
   glVertex3f(-2.5, 27.5, 2.5);
   glEnd();
   glColor3ub(33, 71, 120);
@@ -641,11 +695,10 @@ static void tardis(){
   glEnd();
   glPopMatrix();
   
-  glColor3ub(40, 80, 132);
   //base platform rectangle
   glPushMatrix();
   
-  glTranslatef(0.0f, 0.0f, 0.0f);
+  glColor3ub(40, 80, 132);
   glBegin(GL_QUAD_STRIP);
   
   glVertex3f(245,0,5);
@@ -660,6 +713,25 @@ static void tardis(){
   glVertex3f(245,10,5);
   glEnd();
   
+  //base platform bottom face
+  glColor3ub(31, 61, 114);
+  glBegin(GL_QUADS);
+  glVertex3f(245,0,5);
+  glVertex3f(5,0,5);
+  glVertex3f(5,0,-235);
+  glVertex3f(245,0,-235);
+  glEnd();
+  
+  glEnable(GL_TEXTURE_2D);
+	glColor3ub(255, 255, 255);
+  glBindTexture(GL_TEXTURE_2D, dw_texture);
+	glBegin(GL_QUADS);
+  glTexCoord3f(0,0,0); glVertex3f(240, 0.5, -230);
+  glTexCoord3f(1,0,0); glVertex3f(10, 0.5, -230);
+  glTexCoord3f(1,1,0); glVertex3f(10, 0.5, 0);
+  glTexCoord3f(0,1,0); glVertex3f(240, 0.5, 0);
+	glEnd();
+  glDisable(GL_TEXTURE_2D);
   
   //triangles around the base of the tardis
   glColor3ub(36, 67, 120);
@@ -690,10 +762,10 @@ static void tardis(){
   glTranslatef(-91,-70,1);
   glColor3ub(208,206,217);
   glBegin(GL_QUADS);
-  glVertex3f(50,0,0);
-  glVertex3f(0,0,0);
-  glVertex3f(0,50,0);
   glVertex3f(50,50,0);
+  glVertex3f(0,50,0);
+  glVertex3f(0,0,0);
+  glVertex3f(50,0,0);
   glEnd();
   glPopMatrix();
   
@@ -721,16 +793,20 @@ static void tardis(){
 }
 // setup lists
 void init() {
+  //load ground texture
+  ground_texture = LoadPNG((char *)"/Users/calebgomer/Workspace/TARDIS/ground.png");
+  //load dw texture
+  dw_texture = LoadPNG((char *)"/Users/calebgomer/Workspace/TARDIS/dw.png");
 
 	qobj = gluNewQuadric();
 	gluQuadricDrawStyle(qobj, GLU_FILL);
   gluQuadricNormals(qobj, GLU_SMOOTH);
 	gluQuadricOrientation(qobj, GLU_OUTSIDE);
-
+  
 	tardis_blackpanel_list = glGenLists(1);
-    glNewList(tardis_blackpanel_list,GL_COMPILE);
-    tardis_blackpanel();
-    glEndList();
+  glNewList(tardis_blackpanel_list,GL_COMPILE);
+  tardis_blackpanel();
+  glEndList();
   
   tardis_panel_list = glGenLists(1);
   glNewList(tardis_panel_list,GL_COMPILE);
@@ -776,12 +852,12 @@ int main(int argc, char **argv) {
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	glutInitWindowPosition(0,0);
 	glutInitWindowSize(1280,800);
-	glutCreateWindow("TATARDIS - Triforces and Time and Relative Dimmension in Space");
+	glutCreateWindow("TARDIS+ - Time and Relative Dimmension in Space + Triforces");
   
-  //glPolygonMode (GL_FRONT, GL_FILL);
-  //glPolygonMode (GL_BACK, GL_LINE);
+  glPolygonMode (GL_FRONT, GL_FILL);
+  glPolygonMode (GL_BACK, GL_LINE);
   
-  init(); //setup lists
+  init(); //setup lists and stuff
   
 	// register callbacks
 	glutDisplayFunc(renderScene);
