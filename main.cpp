@@ -838,9 +838,9 @@ static void tardis(){
 // setup lists
 void init() {
   //load ground texture
-  ground_texture = LoadPNG((char *)"/Users/calebgomer/Workspace/TARDIS/ground.png");
+  ground_texture = LoadPNG((char *)"C:/Users/Erick/Documents/College/Winter2013/Graphics/project1/TARDIS/ground.png");
   //load dw texture
-  dw_texture = LoadPNG((char *)"/Users/calebgomer/Workspace/TARDIS/dw.png");
+  dw_texture = LoadPNG((char *)"C:/Users/Erick/Documents/College/Winter2013/Graphics/project1/TARDIS/dw.png");
 
 	qobj = gluNewQuadric();
 	gluQuadricDrawStyle(qobj, GLU_FILL);
