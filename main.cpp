@@ -1,7 +1,27 @@
+/************************************
+ * Erik Kremer and Caleb Gomer
+ * Computer Graphics Project 1
+ * 
+ * An OpenGL implementation of the
+ * TARDIS police phone box from Doctor Who
+ * with Triforces from the Legend of Zelda
+ * This project is hosted on github
+ * https://github.com/calebgomer/TARDIS
+ * Please note: some of the camera positioning
+ * techniques were learned from this great tutorial
+ * http://www.lighthouse3d.com/tutorials/glut-tutorial/?2
+ ***********************************/
+
+
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#else
+#include <GL/glut.h>
+#endif
 #include <cmath>
 #include <stdlib.h>
 #include <stdio.h>  
-#include <stdarg.h> 
+#include <stdarg.h>
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -9,58 +29,80 @@
 #include <utility>
 #include <string>
 #include "SOIL.h"
-
-#ifdef __APPLE__
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
 using namespace std;
 
-// angle of rotation for the camera direction
+/****************************
+ * determines camera mode
+ * 0 - manual WASD keyboard control
+ * 1 - a front view of the main police box
+ * 2 - a top-left view of the main box
+ * 3 - a top-down view of the box
+ * 4 - a view looking up from the top of the box
+ * (note, use 'x' and 'c' to see objects in view 4)
+ ***************************/
+int camera_mode = 0;
+const int MANUAL_CAMERA = 0;
+
+//angle of rotation for the camera direction
 float angle = 0.0f;
-// actual vector representing the camera's direction
+//actual vector representing the camera's direction
 float lx=0.0f, ly=0.0f, lz=-1.0f;
-// XYZ position of the camera
+//XYZ position of the camera
 float x=0.0f, y=0.0f, yy=0.0f, z=5.0f;
-// the key states. These variables will be zero
-//when no key is being presses
+//the key states. These variables will be zero
+//when no key is being pressed
 float deltaAngle = 0.0f;
 float deltaMove = 0.0f;
 float deltaY = 0.0f;
 float deltaYY = 0.0f;
-int rotate_offset = 0;
-bool draw_wireframes = false;
-bool show_more_tardises = false;
-bool show_triforces = false;
-bool rotate_everything = false;
-int camera_mode = 0;
 
-//triforce light thingy
+//use 'r' to toggle rotations
+bool rotate_everything = false;
+int rotate_offset = 0;
+
+//press 't' to toggle wireframes
+bool draw_wireframes = false;
+
+//press 'x' to toggle more police boxes
+bool show_more_tardises = false;
+
+//press 'c' to toggle more triforces
+bool show_triforces = false;
+
+//top of the polic box cylinder light thingy
 GLUquadric* qobj;
 
 //tardis lists
-GLuint tardis_face_list, tardis_window_list, tardis_panel_list, tardis_blackpanel_list, tardis_list;
-
-//triforce stuff
-GLuint triforce_list;
-GLuint triangle_list;
-const int num_triforces = 10000;
+GLuint
+  tardis_face_list,
+  tardis_window_list,
+  tardis_panel_list,
+  tardis_blackpanel_list,
+  tardis_list;
+//the number of tardises to draw
 const int num_tardises = 10;
+
+//triforce lists
+GLuint
+  triforce_list,
+  triangle_list;
+//the number of triforces to draw
+const int num_triforces = 1000;
 GLfloat triforces[num_triforces][3];
 
 //textures
-GLuint ground_texture;
-GLuint dw_texture;
+GLuint
+  ground_texture,
+  dw_texture;
 
-
-/**print a word*/
+//print a word
 static void printw(string word){
 	for(int i=0; i < word.length();i++){
 		glutStrokeCharacter(GLUT_STROKE_ROMAN, word[i]);
 	}
-
 }
+
+//change the size of the screen
 void changeSize(int w, int h) {
   
 	// Prevent a divide by zero, when window is too short
@@ -85,6 +127,7 @@ void changeSize(int w, int h) {
 	glMatrixMode(GL_MODELVIEW);
 }
 
+//uses SOIL library to load PNGs for textures
 static GLuint LoadPNG(char* filename)
 {
   GLuint texture = SOIL_load_OGL_texture
@@ -104,7 +147,7 @@ static GLuint LoadPNG(char* filename)
   return texture;
 }
 
-
+//draws an excessive number of triforces on the screen
 void triforce_bomb() {
   if (!show_triforces)
     return;
@@ -129,6 +172,7 @@ void triforce_bomb() {
     
     //randomize scale
     float x = (50-((int)abs(triforces[i][0])%100))/50.0;
+    x = x*2;
     glScalef(x,x,x);
     
     //draw the triforce
@@ -142,6 +186,7 @@ void triforce_bomb() {
   glPopMatrix();
 }
 
+//draws an excessive number of tardises on the screen
 void tardis_bomb() {
   if (!show_more_tardises)
     return;
@@ -178,6 +223,7 @@ void tardis_bomb() {
   glPopMatrix();
 }
 
+//computes the new position of the camera
 void computePos(float deltaMove) {
   
 	x += deltaMove * lx * 0.1f;
@@ -189,6 +235,7 @@ void computePos(float deltaMove) {
   deltaYY = 0.0f;
 }
 
+//computes the new angle of the camera
 void computeDir(float deltaAngle) {
   
 	angle += deltaAngle;
@@ -196,6 +243,7 @@ void computeDir(float deltaAngle) {
 	lz = -cos(angle);
 }
 
+//renders the scene
 void renderScene(void) {
 	if (deltaMove)
 		computePos(deltaMove);
@@ -209,9 +257,11 @@ void renderScene(void) {
   
 	// Reset transformations
 	glLoadIdentity();
+  
+  
 	// Set the camera
   switch (camera_mode) {
-    case 0:
+    case MANUAL_CAMERA:
       gluLookAt(x, y, z, x+lx, yy,  z+lz, 0.0f, 1.0f,  0.0f);
       break;
     case 1:
@@ -250,7 +300,7 @@ void renderScene(void) {
   //FLOATING TARDISES
   tardis_bomb();
   
-  /***rotate***/
+  //rotate
   glRotatef((rotate_offset%240)*1.5, 0, 1, 0);
   
   //TARDIS
@@ -263,8 +313,10 @@ void renderScene(void) {
 }
 
 
+/******************************************
+ * Press Special Key
+ *****************************************/
 void pressKey(int key, int xx, int yy) {
-  
 	switch (key) {
 		case GLUT_KEY_LEFT : deltaYY = -0.2f; break;
 		case GLUT_KEY_RIGHT : deltaYY = +0.2f; break;
@@ -275,8 +327,10 @@ void pressKey(int key, int xx, int yy) {
 	}
 }
 
-void releaseKey(int key, int x, int y) {
-  
+/******************************************
+ * Release Special Key
+ *****************************************/
+void releaseKey(int key, int x, int y) {  
 	switch (key) {
 		case GLUT_KEY_LEFT : break;
 		case GLUT_KEY_RIGHT : break;
@@ -285,6 +339,9 @@ void releaseKey(int key, int x, int y) {
 	}
 }
 
+/******************************************
+ * Press Keyboard
+ *****************************************/
 void keyboardFunc (unsigned char key, int x, int y) {
   switch (key) {
     case 033:
@@ -304,7 +361,6 @@ void keyboardFunc (unsigned char key, int x, int y) {
 
 /******************************************
  * Release Keyboard
- * One of three triangles in a triforce
  *****************************************/
 void releaseKeyboard (unsigned char key, int x, int y) {
   switch (key) {
@@ -343,7 +399,6 @@ void releaseKeyboard (unsigned char key, int x, int y) {
       break;
   }
 }
-
 
 
 /******************************************
@@ -662,7 +717,7 @@ static void tardis(){
   
   glColor3ub(32, 60, 105);
   glTranslatef(82.5,5,-82.5);
-	glLineWidth(10);
+	glLineWidth(4);
   glBegin(GL_LINES);
   glVertex3f(0, 0, 0);
   glVertex3f(0, 27.5, 0);
@@ -838,10 +893,11 @@ static void tardis(){
 // setup lists
 void init() {
   //load ground texture
-  ground_texture = LoadPNG((char *)"C:/Users/Erick/Documents/College/Winter2013/Graphics/project1/TARDIS/ground.png");
+  ground_texture = LoadPNG((char *)"/<path-to-image>/ground.png");
   //load dw texture
-  dw_texture = LoadPNG((char *)"C:/Users/Erick/Documents/College/Winter2013/Graphics/project1/TARDIS/dw.png");
+  dw_texture = LoadPNG((char *)"/<path-to-image>/dw.png");
 
+  //cylinder light at the top of the police box
 	qobj = gluNewQuadric();
 	gluQuadricDrawStyle(qobj, GLU_FILL);
   gluQuadricNormals(qobj, GLU_SMOOTH);
@@ -884,7 +940,7 @@ void init() {
 }
 
 int main(int argc, char **argv) {
-	draw_wireframes = true;
+  //compute the locations of all the triforces one time
   for (int i = 0; i < num_triforces; i++) {
     triforces[i][0]= rand()%200-100;
     triforces[i][1]= rand()%100;
@@ -895,7 +951,7 @@ int main(int argc, char **argv) {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	glutInitWindowPosition(0,0);
-	glutInitWindowSize(1280,800);
+	glutInitWindowSize(1024,768);
 	glutCreateWindow("TARDIS+ - Time and Relative Dimmension in Space + Triforces");
   
   init(); //setup lists and stuff
@@ -921,5 +977,3 @@ int main(int argc, char **argv) {
   
 	return 1;
 }
-
-
