@@ -30,7 +30,11 @@ float deltaMove = 0.0f;
 float deltaY = 0.0f;
 float deltaYY = 0.0f;
 int rotate_offset = 0;
-bool wireToggle;
+bool draw_wireframes = false;
+bool show_more_tardises = false;
+bool show_triforces = false;
+bool rotate_everything = false;
+int camera_mode = 0;
 
 //triforce light thingy
 GLUquadric* qobj;
@@ -102,7 +106,10 @@ static GLuint LoadPNG(char* filename)
 
 
 void triforce_bomb() {
-  rotate_offset++;
+  if (!show_triforces)
+    return;
+  if (rotate_everything)
+    rotate_offset++;
   
   glPushMatrix();
   
@@ -138,7 +145,10 @@ void triforce_bomb() {
 }
 
 void tardis_bomb() {
-  rotate_offset++;
+  if (!show_more_tardises)
+    return;
+  if (rotate_everything)
+    rotate_offset++;
   
   glPushMatrix();
   
@@ -192,7 +202,6 @@ void computeDir(float deltaAngle) {
 }
 
 void renderScene(void) {
-  
 	if (deltaMove)
 		computePos(deltaMove);
 	if (deltaAngle)
@@ -223,6 +232,8 @@ void renderScene(void) {
   }
   
   
+  glPolygonMode (GL_BACK, GL_LINE);
+  
   // Draw ground
   glEnable(GL_TEXTURE_2D);
 	glColor3ub(255, 255, 255);
@@ -242,7 +253,8 @@ void renderScene(void) {
   //FLOATING TARDISES
   tardis_bomb();
   
-//  glRotatef((rotate_offset%240)*1.5, 0, 1, 0);
+  /***rotate***/
+  glRotatef((rotate_offset%240)*1.5, 0, 1, 0);
   
   //TARDIS
   glScalef(0.05f, 0.05f, 0.05f);
@@ -283,10 +295,10 @@ void keyboardFunc (unsigned char key, int x, int y) {
       exit(1);
       break;
       
-    case 'a' : deltaAngle = -0.01f; break;
-		case 'd' : deltaAngle = 0.01f; break;
-		case 'w' : deltaMove = 3.0f; break;
-		case 's' : deltaMove = -3.0f; break;
+    case 'a' : deltaAngle = -0.01f; camera_mode = 0; break;
+		case 'd' : deltaAngle = 0.01f; camera_mode = 0; break;
+		case 'w' : deltaMove = 3.0f; camera_mode = 0; break;
+		case 's' : deltaMove = -3.0f; camera_mode = 0; break;
       
     default:
       break;
@@ -301,9 +313,18 @@ void releaseKeyboard (unsigned char key, int x, int y) {
   switch (key) {
    //toggle wireframes
 	  case 't':
-      glPolygonMode(GL_FRONT_AND_BACK, (wireToggle)?GL_LINE:GL_FILL);
-      wireToggle = !wireToggle;
+      glPolygonMode(GL_FRONT, (draw_wireframes)?GL_LINE:GL_FILL);
+      draw_wireframes = !draw_wireframes;
 		  break;
+    case 'x':
+      show_more_tardises = !show_more_tardises;
+      break;
+    case 'c':
+      show_triforces = !show_triforces;
+      break;
+    case 'r':
+      rotate_everything = !rotate_everything;
+      break;
     case '1':
       camera_mode = 1;
       break;
@@ -866,7 +887,7 @@ void init() {
 }
 
 int main(int argc, char **argv) {
-	wireToggle = true;
+	draw_wireframes = true;
   for (int i = 0; i < num_triforces; i++) {
     triforces[i][0]= rand()%200-100;
     triforces[i][1]= rand()%100;
@@ -879,9 +900,6 @@ int main(int argc, char **argv) {
 	glutInitWindowPosition(0,0);
 	glutInitWindowSize(1280,800);
 	glutCreateWindow("TARDIS+ - Time and Relative Dimmension in Space + Triforces");
-  
-  glPolygonMode (GL_FRONT, GL_FILL);
-  glPolygonMode (GL_BACK, GL_LINE);
   
   init(); //setup lists and stuff
   
