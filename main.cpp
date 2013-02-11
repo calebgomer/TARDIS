@@ -45,7 +45,7 @@ GLuint tardis_face_list, tardis_window_list, tardis_panel_list, tardis_blackpane
 //triforce stuff
 GLuint triforce_list;
 GLuint triangle_list;
-const int num_triforces = 1000;
+const int num_triforces = 10000;
 const int num_tardises = 10;
 GLfloat triforces[num_triforces][3];
 
@@ -108,8 +108,6 @@ static GLuint LoadPNG(char* filename)
 void triforce_bomb() {
   if (!show_triforces)
     return;
-  if (rotate_everything)
-    rotate_offset++;
   
   glPushMatrix();
   
@@ -147,9 +145,6 @@ void triforce_bomb() {
 void tardis_bomb() {
   if (!show_more_tardises)
     return;
-  if (rotate_everything)
-    rotate_offset++;
-  
   glPushMatrix();
   
   for (int i = 0; i < num_tardises; i++) {
@@ -206,6 +201,8 @@ void renderScene(void) {
 		computePos(deltaMove);
 	if (deltaAngle)
 		computeDir(deltaAngle);
+  if (rotate_everything)
+    rotate_offset++;
   
 	// Clear Color and Depth Buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -682,7 +679,7 @@ static void tardis(){
   glVertex3f(0, 0, -25);
   glVertex3f(0, 27.5, -25);
   glEnd();
-  glLineWidth(0);
+  glLineWidth(1);
   glBegin(GL_TRIANGLE_FAN);
   glVertex3f(12.5, 35, -12.5);
   glVertex3f(-2.5, 27.5, 2.5);
@@ -877,7 +874,7 @@ void init() {
   
   triangle_list = glGenLists(1);
   glNewList(triangle_list, GL_COMPILE);
-  triangle(0.2);
+  triangle(0.35);
   glEndList();
   
   triforce_list = glGenLists(1);
