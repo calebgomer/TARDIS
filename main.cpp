@@ -204,9 +204,23 @@ void renderScene(void) {
 	// Reset transformations
 	glLoadIdentity();
 	// Set the camera
-	gluLookAt(	x, y, z,
-            x+lx, yy,  z+lz,
-            0.0f, 1.0f,  0.0f);
+  switch (camera_mode) {
+    case 0:
+      gluLookAt(x, y, z, x+lx, yy,  z+lz, 0.0f, 1.0f,  0.0f);
+      break;
+    case 1:
+      gluLookAt(0, 0, 40, 0, 18, 0, 0, 1, 0);
+      break;
+    case 2:
+      gluLookAt(-50, 30, 40, 0, 15, 0, 0, 1, 0);
+      break;
+    case 3:
+      gluLookAt(0, 80, -30, 0, 0, 0, 0, 0, 1);
+      break;
+    case 4:
+      gluLookAt(0, 40, 0, 20, 50, 20, 0, 1, 0);
+      break;
+  }
   
   
   // Draw ground
@@ -290,6 +304,18 @@ void releaseKeyboard (unsigned char key, int x, int y) {
       glPolygonMode(GL_FRONT_AND_BACK, (wireToggle)?GL_LINE:GL_FILL);
       wireToggle = !wireToggle;
 		  break;
+    case '1':
+      camera_mode = 1;
+      break;
+    case '2':
+      camera_mode = 2;
+      break;
+    case '3':
+      camera_mode = 3;
+      break;
+    case '4':
+      camera_mode = 4;
+      break;
 		case 'a' :
 		case 'd' : deltaAngle = 0.0f;break;
 		case 'w' :
